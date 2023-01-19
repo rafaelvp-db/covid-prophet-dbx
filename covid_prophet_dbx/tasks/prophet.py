@@ -6,6 +6,7 @@ import pandas as pd
 
 class ProphetTask(Task):
     def _fit(
+        self,
         train_df: pd.DataFrame,
         weekly_seasonality: bool = True,
         daily_seasonality: bool = True
@@ -27,38 +28,56 @@ class ProphetTask(Task):
         m.fit(train_df)
         return m
 
-    def predict(model: Prophet, periods = 30):
+    def _predict(
+        self,
+        model: Prophet,
+        periods = 30
+    ):
 
         # Predict
         future = model.make_future_dataframe(periods=periods)
         result = model.predict(future)
         return result
-        
+
     def _train_predict(self):
-        db = self.conf["input"].get("database", "default")
-        table = self.conf["input"]["table"]
+        input_db = self.conf["input"].get("database", "default")
+        output_db = self.conf["output"].get("database", "default")
+        input_table = self.conf["input"]["table"]
+        output_table = self.conf["output"].get("database", "default")
         date_cap = self.conf["train"]["cap"]
         country = self.conf["input"]["country"]
 
-        df: DataFrame = self.spark.sql(f"select * from {db}.{table}")
-        df = df.filter(f'location = "{country}"').select("date", "new_cases", "new_deaths")
+        df: DataFrame = self.spark.sql(f"select * from {input_db}.{input_table}")
+        df = df \
+                .filter(f'location = "{country}"') \
+                .select("date", "new_cases", "new_deaths")
+
         pandas_df = df.toPandas()
         train_df = pandas_df[pandas_df["date"] <= date_cap]
-        test_df = pandas_df[pandas_df["date"] > date_cap]
+
+        m = self._fit(train_df = train_df)
+        predictions_df = self._predict(model = m)
+        self.logger.info(f"Predictions DF: {predictions_df}")
+        spark_predictions_df = self.spark.createDataFrame(predictions_df)
+        self.logger.info(f"Returned {len(predictions_df)} predictions")
 
         # Write into delta table
-        self.spark.sql(f"create database if not exists {db}")
-        df_predictions.write.saveAsTable(f"{db}.{table}", mode = "overwrite")
+        self.logger.info("Writing prediction results")
+        self.spark.sql(f"create database if not exists {output_db}")
+        spark_predictions_df.write.saveAsTable(
+            f"covid_fc.prediction",
+            mode = "overwrite"
+        )
         self.logger.info("Predictions successfully written")
 
     def launch(self):
-        self.logger.info("Launching Ingestion task")
-        self._ingest_data()
-        self.logger.info("Ingestion task finished!")
+        self.logger.info("Launching Prophet task")
+        self._train_predict()
+        self.logger.info("Prophet task finished!")
 
 # if you're using python_wheel_task, you'll need the entrypoint function to be used in setup.py
 def entrypoint():  # pragma: no cover
-    task = IngestionTask()
+    task = ProphetTask()
     task.launch()
 
 # if you're using spark_python_task, you'll need the __main__ block to start the code execution
