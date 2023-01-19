@@ -11,6 +11,8 @@ with open(output_path, "w") as file:
 df = spark.read.csv(output_path.replace("/dbfs", ""), header = True, inferSchema = True)
 display(df)
 
+# Changes
+
 # COMMAND ----------
 
 df_europe = df.filter("continent = 'Europe'")
@@ -25,7 +27,3 @@ display(df_europe)
 
 spark.sql("create database if not exists covid_fc")
 df_europe.write.saveAsTable("covid_fc.bronze", mode = "overwrite")
-
-# COMMAND ----------
-
-
