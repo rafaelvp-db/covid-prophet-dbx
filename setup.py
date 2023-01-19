@@ -39,9 +39,8 @@ setup(
     extras_require={"local": LOCAL_REQUIREMENTS, "test": TEST_REQUIREMENTS},
     entry_points = {
         "console_scripts": [
-            "etl = covid_prophet_dbx.tasks.sample_etl_task:entrypoint",
-            "ml = covid_prophet_dbx.tasks.sample_ml_task:entrypoint",
-            "ingestion = covid_prophet_dbx.tasks.ingest:entrypoint"
+            "prophet = covid_prophet_dbx.tasks.prophet:entrypoint",
+            "ingest = covid_prophet_dbx.tasks.ingest:entrypoint"
     ]},
     version=__version__,
     description="",
