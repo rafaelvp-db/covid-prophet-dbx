@@ -77,4 +77,10 @@ plt.title("Out of Sample Forecast")
 
 # COMMAND ----------
 
+spark.sql("create database if not exists covid_fc")
+output_df = spark.createDataFrame(pred)
+output_df.write.saveAsTable("covid_fc.prediction")
+
+# COMMAND ----------
+
 
