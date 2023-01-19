@@ -12,8 +12,8 @@ display(df)
 df = df.filter('location = "United Kingdom"').select("date", "new_cases", "new_deaths")
 pandas_df = df.toPandas()
 
-train_df = pandas_df[pandas_df["date"] <= '2022-07-01']
-test_df = pandas_df[pandas_df["date"] > '2022-07-01']
+train_df = pandas_df[pandas_df["date"] <= '2022-08-01']
+test_df = pandas_df[pandas_df["date"] > '2022-08-01']
 
 print(f"Training set has {len(train_df)} rows")
 print(f"Testing set has {len(test_df)} rows")
@@ -52,7 +52,7 @@ def predict(model: Prophet, periods = 30):
 # COMMAND ----------
 
 m = fit(train_df)
-forecast = predict(m)
+forecast = predict(m, periods = 30)
 m.plot_components(forecast)
 
 # COMMAND ----------
@@ -60,27 +60,16 @@ m.plot_components(forecast)
 import seaborn as sns
 from matplotlib import pyplot as plt
 
-sns.scatterplot(x = forecast.ds, y = forecast.yhat, label = "predicted")
-sns.scatterplot(x = train_df.date, y = train_df.new_cases, label = "actual")
+sns.scatterplot(
+  x = forecast[forecast['ds'] > '2022-08-01'].ds,
+  y = forecast[forecast['ds'] > '2022-08-01'].yhat,
+  label = "predicted"
+)
+
+sns.scatterplot(
+  x = test_df[test_df['date'] < '2022-09-01'].date,
+  y = test_df[test_df['date'] < '2022-09-01'].new_cases,
+  label = "actual"
+)
 plt.xticks(rotation=45)
-plt.title("In Sample Forecast")
-
-# COMMAND ----------
-
-test_df = test_df.rename(columns = {"date": "ds"})
-pred = m.predict(test_df)
-
-sns.scatterplot(x = pred.ds, y = pred.yhat, label = "predicted")
-sns.scatterplot(x = test_df.ds, y = test_df.new_cases, label = "actual")
-plt.xticks(rotation=45)
-plt.title("Out of Sample Forecast")
-
-# COMMAND ----------
-
-spark.sql("create database if not exists covid_fc")
-output_df = spark.createDataFrame(pred)
-output_df.write.saveAsTable("covid_fc.prediction")
-
-# COMMAND ----------
-
-
+plt.title("Actual x Forecasted")
