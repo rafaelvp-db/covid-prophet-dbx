@@ -3,7 +3,6 @@ from pyspark.sql import DataFrame
 from prophet import Prophet
 import pandas as pd
 
-
 class ProphetTask(Task):
     def _fit(
         self,
