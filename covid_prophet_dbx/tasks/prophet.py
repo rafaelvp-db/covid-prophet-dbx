@@ -40,10 +40,10 @@ class ProphetTask(Task):
         return result
 
     def _train_predict(self):
-        input_db = self.conf["input"].get("database", "default")
-        output_db = self.conf["output"].get("database", "default")
+        input_db = self.conf["input"]["database"]
+        output_db = self.conf["output"]["database"]
         input_table = self.conf["input"]["table"]
-        output_table = self.conf["output"].get("database", "default")
+        output_table = self.conf["output"]["table"]
         date_cap = self.conf["train"]["cap"]
         country = self.conf["input"]["country"]
 
@@ -65,7 +65,7 @@ class ProphetTask(Task):
         self.logger.info("Writing prediction results")
         self.spark.sql(f"create database if not exists {output_db}")
         spark_predictions_df.write.saveAsTable(
-            f"covid_fc.prediction",
+            f"{output_db}.{output_table}",
             mode = "overwrite"
         )
         self.logger.info("Predictions successfully written")

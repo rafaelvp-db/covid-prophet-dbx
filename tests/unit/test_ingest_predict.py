@@ -39,9 +39,10 @@ def test_ingest_predict(spark: SparkSession):
         "train": train_config,
         "input": input_config
     }
+    logging.info(f"Config: {test_prophet_config}")
     prophet_job = ProphetTask(spark, test_prophet_config)
     prophet_job.launch()
-    table_name = f"{output_config['database']}.{output_config['table']}"
-    _count = spark.sql(f"select * from {table_name}").count()
+    table_name = f'{output_config["database"]}.{output_config["table"]}'
+    _count = spark.table(table_name).count()
 
     assert _count > 0
