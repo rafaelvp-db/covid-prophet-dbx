@@ -19,7 +19,8 @@ LOCAL_REQUIREMENTS = [
     "pandas",
     "mlflow",
     "pytest",
-    "requests"
+    "requests",
+    "prophet"
 ]
 
 TEST_REQUIREMENTS = [

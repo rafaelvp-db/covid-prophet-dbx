@@ -1,0 +1,11 @@
+input:
+  database: "covid_fc"
+  table: "bronze"
+  country: "United Kingdom"
+
+train:
+  cap: "2022-07-01"
+
+output:
+  database: "covid_fc"
+  table: "prediction"
