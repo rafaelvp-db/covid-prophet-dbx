@@ -37,6 +37,14 @@ environments:
               package_name: "covid_prophet_dbx"
               entry_point: "etl" # take a look at the setup.py entry_points section for details on how to define an entrypoint
               parameters: ["--conf-file", "file:fuse://conf/tasks/sample_etl_config.yml"]
+      - name: "covid-prophet-dbx-ingest"
+        tasks:
+          - task_key: "ingestion"
+            <<: *basic-static-cluster
+            python_wheel_task:
+              package_name: "covid_prophet_dbx"
+              entry_point: "ingest" # take a look at the setup.py entry_points section for details on how to define an entrypoint
+              parameters: ["--conf-file", "file:fuse://conf/tasks/ingest.yml"]
       #############################################################
       # this is an example multitask job with notebook task       #
       #############################################################
