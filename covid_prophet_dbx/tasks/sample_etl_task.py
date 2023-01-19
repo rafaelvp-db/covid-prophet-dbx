@@ -3,8 +3,8 @@ from sklearn.datasets import fetch_california_housing
 import pandas as pd
 
 
-class SampleETLTask(Task):
-    def _write_data(self):
+class IngestTask(Task):
+    def ingest_covid_data(self):
         db = self.conf["output"].get("database", "default")
         table = self.conf["output"]["table"]
         self.logger.info(f"Writing housing dataset to {db}.{table}")

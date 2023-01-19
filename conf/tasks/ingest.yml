@@ -1,0 +1,7 @@
+input:
+  url: 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
+
+output:
+  path: '/dbfs/tmp/covid.csv'
+  database: 'covid_fc'
+  table: 'bronze'
