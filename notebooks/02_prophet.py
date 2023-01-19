@@ -54,3 +54,27 @@ def predict(model: Prophet, periods = 30):
 m = fit(train_df)
 forecast = predict(m)
 m.plot_components(forecast)
+
+# COMMAND ----------
+
+import seaborn as sns
+from matplotlib import pyplot as plt
+
+sns.scatterplot(x = forecast.ds, y = forecast.yhat, label = "predicted")
+sns.scatterplot(x = train_df.date, y = train_df.new_cases, label = "actual")
+plt.xticks(rotation=45)
+plt.title("In Sample Forecast")
+
+# COMMAND ----------
+
+test_df = test_df.rename(columns = {"date": "ds"})
+pred = m.predict(test_df)
+
+sns.scatterplot(x = pred.ds, y = pred.yhat, label = "predicted")
+sns.scatterplot(x = test_df.ds, y = test_df.new_cases, label = "actual")
+plt.xticks(rotation=45)
+plt.title("Out of Sample Forecast")
+
+# COMMAND ----------
+
+
