@@ -1,10 +1,4 @@
 # Databricks notebook source
-output_path = "/dbfs/tmp/covid.csv"
-
-!wget https://covid.ourworldindata.org/data/owid-covid-data.csv -O {output_path}
-
-# COMMAND ----------
-
 import requests
 
 url = 'https://covid.ourworldindata.org/data/owid-covid-data.csv'
