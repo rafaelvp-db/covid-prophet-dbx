@@ -4,24 +4,36 @@ import pandas as pd
 
 # COMMAND ----------
 
-train_df = pd.read_csv("/dbfs/FileStore/rafael.pierre/covid/train.csv")
-train_df
+df = spark.sql("select * from covid_fc.bronze")
+display(df)
+
+# COMMAND ----------
+
+df = df.filter('location = "United Kingdom"').select("date", "new_cases", "new_deaths")
+pandas_df = df.toPandas()
+
+train_df = pandas_df[pandas_df["date"] <= '2022-07-01']
+test_df = pandas_df[pandas_df["date"] > '2022-07-01']
+
+print(f"Training set has {len(train_df)} rows")
+print(f"Testing set has {len(test_df)} rows")
 
 # COMMAND ----------
 
 def fit(
   train_df: pd.DataFrame,
-  country_region: str = "China",
   weekly_seasonality: bool = True,
   daily_seasonality: bool = True
 ):
 
-  m = Prophet(weekly_seasonality=weekly_seasonality, daily_seasonality=daily_seasonality)
+  m = Prophet(
+    weekly_seasonality = weekly_seasonality,
+    daily_seasonality = daily_seasonality
+  )
   train_df = (
     train_df
-      .query(f"Country_Region == '{country_region}'")
-      .loc[:, ["Date", "ConfirmedCases"]]
-      .rename(columns = {"Date": "ds", "ConfirmedCases": "y"})
+      .loc[:, ["date", "new_cases"]]
+      .rename(columns = {"date": "ds", "new_cases": "y"})
   )
 
   train_df["ds"] = pd.to_datetime(train_df["ds"])
@@ -42,7 +54,3 @@ def predict(model: Prophet, periods = 30):
 m = fit(train_df)
 forecast = predict(m)
 m.plot_components(forecast)
-
-# COMMAND ----------
-
-
